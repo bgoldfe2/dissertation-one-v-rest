@@ -29,6 +29,7 @@ def parse_tvn(run_folder):
     results_flag = '_acc-'
     results_file_list = []
     output_folder = ''.join([run_folder,'Output/'])
+    print(output_folder)
     for filename in os.listdir(output_folder):
         f = os.path.join(output_folder, filename)
         # checking if it is a file
@@ -39,11 +40,11 @@ def parse_tvn(run_folder):
     print(results_file_list)
     
     for results in results_file_list:    
-        
-        # stand in for getting the file trait identifier during loop
+        # file trait identifier during loop
+        file_trt = results.split('---')[0]
+        print('The file trait this iteration is ',file_trt)
 
-        file_trt = results.split('-')[1]
-        print(file_trt)
+        # Set the file location for one v rest runs        
         file = ''.join([run_folder,'Output/',results])
 
         df = pd.read_csv(file)
@@ -61,21 +62,21 @@ def parse_tvn(run_folder):
         print("Size of each trait \n", count)
 
         # Aggregate Confusion Matrix generation for the model        
-        print("confusion matrix for ","religion"," versus Not Cyberbullying")
+        #print("confusion matrix for ","religion"," versus Not Cyberbullying")
         cm = confusion_matrix(df['target'], df['y_pred'])
-        print("the type of the confusion matrix is ", type(cm))
+        #print("the type of the confusion matrix is ", type(cm))
         # Print the confusion matrix
         print(cm)
         fig1, ax = plt.subplots()
-        plt.title(''.join(["Single Trait ", file_trt, " vs Single Trait Notcb"]))
+        plt.title(''.join(["Single Trait ", file_trt, " vs All the Rest"]))
         sns.heatmap(cm, annot=True, fmt='d')
         plt.xlabel('Predicted')
         plt.ylabel('True')
-        trt_labels = [file_trt,'Notcb']
+        trt_labels = [file_trt,'All-the-Rest']
         ax.set_yticklabels(trt_labels)
         ax.set_xticklabels(trt_labels)
         #plt.show()  # Show all plots at the end - can be same for saving?
-        fig1.savefig(''.join([run_folder, 'Figures/','ensemble-bin-',file_trt,'-vs-Notcb-conf-mat.pdf']))
+        fig1.savefig(''.join([run_folder, 'Ensemble/Figures/','ensemble-bin-',file_trt,'-vs-All-the-Rest-conf-mat.pdf']))
         
         # Check to see the numbers add to 9541 = size of the test set
         cm_sum =  cm.sum()
@@ -85,13 +86,11 @@ def parse_tvn(run_folder):
         df['false_neg'] = np.where(df['target']==1, 1, 0) & np.where(df['y_pred']==0, 1, 0)
         df_cnt_fp = df.groupby('label')['false_pos'].apply(lambda x: (x==True).sum()).reset_index(name='count')
         df_cnt_fn = df.groupby('label')['false_neg'].apply(lambda x: (x==True).sum()).reset_index(name='count')
-        
-        print('false positives')
-        print(df_cnt_fp)
-        print(type(df_cnt_fp))
-        print(df_cnt_fp.axes)
-
-        print("trait in loop is ", file_trt)
+        # print('this is the df_cnt_fn ', df_cnt_fn)
+        # print('false positives')
+        # print(df_cnt_fp)
+        # print(type(df_cnt_fp))
+        # print(df_cnt_fp.axes)
 
         fp = df_cnt_fp.loc[df_cnt_fp['label']==file_trt, 'count'].values[0]
         fn = df_cnt_fn.loc[df_cnt_fn['label']==file_trt, 'count'].values[0]
@@ -103,8 +102,8 @@ def parse_tvn(run_folder):
 
         # Create each sub-confusion matrix of 2 x 2 for the five traits
         # Test hard coded for religion
-        total_religion = count.get(file_trt)  # 1575
-        print("total in religion is ", total_religion)
+        total_in_trt = count.get(file_trt)  # 1575
+        print('total in ', file_trt, ' religion is ', total_in_trt)
 
         total_true_religion = cm[0][0]
         total_true_notcb = cm[1][1]
@@ -121,9 +120,9 @@ def parse_tvn(run_folder):
         y = df_cnt_fp.iloc[:, 1].to_list()
         #y = cm_religion.T[1]
         print(" x ", x, " y ", y)
-        plt.title("".join([file_trt, " vs Notcb Model, ", file_trt, " that were labelled Notcb"]))
+        plt.title("".join([file_trt, " vs All the Rest Model, ", file_trt, " that were labelled All the Rest"]))
         plt.bar(x, y)
-        fig2.savefig(''.join([run_folder, 'Figures/','ensemble-bin-',file_trt,'-False-Notcb-bar-plot.pdf']))
+        fig2.savefig(''.join([run_folder, 'Ensemble/Figures/','ensemble-bin-',file_trt,'-False-All-the-Rest-bar-plot.pdf']))
 
 
         # Show the distribution of the Notcb inferences that should have been cyberbullying
@@ -133,9 +132,9 @@ def parse_tvn(run_folder):
         y = df_cnt_fn.iloc[:, 1].to_list()
         #y = cm_religion.T[1]
         print(" x ", x, " y ", y)
-        plt.title("".join([file_trt, " vs Notcb Model, Notcb and all the rest that were labelled ", file_trt]))
+        plt.title("".join([file_trt, " vs All the Rest Model, All the Rest that were labelled ", file_trt]))
         plt.bar(x, y)
-        fig3.savefig(''.join([run_folder, 'Figures/','ensemble-bin-Notcb-False-',file_trt,'.pdf']))
+        fig3.savefig(''.join([run_folder, 'Ensemble/Figures/','ensemble-bin-All-the-Rest-False-',file_trt,'.pdf']))
 
         # Show the plot TURN ON FOR DEBUG
         plt.show()
@@ -145,6 +144,6 @@ def parse_tvn(run_folder):
 
 
 if __name__=="__main__":
-    test_run = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/'
+    test_run = '../Runs/2023-08-24_17_46_26--roberta-base/'
     parse_tvn(test_run)
     #graph_by_trt(df, cm)
