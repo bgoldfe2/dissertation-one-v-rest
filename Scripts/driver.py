@@ -64,7 +64,7 @@ def get_parser():
     parser.add_argument("--ensemble_type", type=str, default="max-voting", help="Ensemble type - max-voting or averaging")
 
     parser.add_argument("--run_path", default="../Runs/", type=str, help='Path to Run logs')
-    parser.add_argument("--dataset_path", default="../Dataset/Binary/", type=str, help='Path to dataset file')
+    parser.add_argument("--dataset_path", default="../Dataset/BinOneRest/", type=str, help='Path to dataset file')
     parser.add_argument("--model_path", default="../Models/", type=str, help='Save best model')
     parser.add_argument("--output_path", default="../Output/", type=str, help='Get predicted labels for test data')
     parser.add_argument("--figure_path", default="../Figures/", type=str, help='Directory for accuracy and loss plots')

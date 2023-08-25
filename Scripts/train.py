@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 from Model_Config import Model_Config, traits
 import os
 
-os.chdir('/home/bruce/dev/dissertation-binary/Scripts')
+os.chdir('/home/bruce/dev/dissertation-one-v-rest/Scripts')
 
 
 def run(args: Model_Config):
@@ -40,76 +40,18 @@ def run(args: Model_Config):
     #print(os.getcwd())
     # Get the absolute path to the file
     #file_path = os.path.abspath("../Dataset/Binary/train/train_Age.csv")
-    os.chdir('/home/bruce/dev/dissertation-binary/Scripts')
+    #os.chdir('/home/bruce/dev/dissertation-one-v-rest/Scripts')
     #print(pd.read_csv(file_path).head())
     
 
-    # the loop would get all the single traits 
-    all_traits = {} 
-    for i in range(0,6):
-        all_traits[''.join(['train_',str(i)])] = pd.read_csv(''.join([args.dataset_path, 'train/train_', traits.get(str(i)), '.csv'   ])).dropna()
-        all_traits[''.join(['val_',str(i)])] = pd.read_csv(''.join([args.dataset_path, 'val/val_', traits.get(str(i)), '.csv'   ])).dropna()
-        all_traits[''.join(['test_',str(i)])] = pd.read_csv(''.join([args.dataset_path, 'test/test_', traits.get(str(i)), '.csv'   ])).dropna()
+    for trt in range(0,6):
+        train_df = pd.read_csv(''.join([args.dataset_path, 'train/train_', traits.get(str(trt)), '_one_v_rest.csv'   ])).dropna()
+        valid_df = pd.read_csv(''.join([args.dataset_path, 'val/val_', traits.get(str(trt)), '_one_v_rest.csv'   ])).dropna()
+        test_df = pd.read_csv(''.join([args.dataset_path, 'test/test_', traits.get(str(trt)), '_one_v_rest.csv'   ])).dropna()
 
-    #print(all_traits)
-
-    cb_trts = [0, 1, 2, 4, 5]
-    for trt in cb_trts:
-        #trt = 1     # Hand checking all the traits
-        train_df =  all_traits.get(''.join(['train_',str(trt)]))
-        valid_df =  all_traits.get(''.join(['val_',str(trt)]))
-        test_df =   all_traits.get(''.join(['test_',str(trt)])) 
-
-        # Set the target values of the trait to 0
-        train_df['target'].replace(trt,0, inplace=True)
-        valid_df['target'].replace(trt,0, inplace=True)
-        test_df['target'].replace(trt,0, inplace=True)
-
-        # Append single trait with Notcb 3
-        # As of pandas 2.0, append (previously deprecated) was removed.
-        # You need to use concat instead (for most applications):
-        trt_ncb = 3
-        loc = [''.join(['train_',str(trt_ncb)]),
-               ''.join(['val_',str(trt_ncb)]),
-               ''.join(['test_',str(trt_ncb)])]
-
-        #train_df = pd.concat([train_df, pd.DataFrame(all_traits.get(loc[0]))],ignore_index = True)
-        #valid_df = pd.concat([train_df, pd.DataFrame(all_traits.get(loc[1]))],ignore_index = True)
-        #train_df = pd.concat([train_df, pd.DataFrame(all_traits.get(loc[2]))],ignore_index = True)
-        train_df = train_df._append(all_traits.get(''.join(['train_',str(trt_ncb)])),ignore_index = True)
-        valid_df = valid_df._append(all_traits.get(''.join(['val_',str(trt_ncb)])),ignore_index = True)
-        test_df = test_df._append(all_traits.get(''.join(['test_',str(trt_ncb)])),ignore_index = True)
-        print("length of test_df is ", len(test_df))
-
-        # Set the target values to 1 for the Notcb
-        
-        train_df['target'].replace(trt_ncb,1, inplace=True)
-        valid_df['target'].replace(trt_ncb,1, inplace=True)
-        test_df['target'].replace(trt_ncb,1, inplace=True)
-        
-        #print(train_df)
-        
-        #print(set(train_df.label.values))
-        #print("train len - {}, valid len - {}, test len - {}".format(len(train_df),\
-        #len(valid_df),len(test_df)))
-        #for col in train_df.columns:
-            #print(col)
-        #print("train example text -- ",train_df.text[1],"\nwith target -- ",\
-        #train_df.label[1])
-        
-        # BHG Text encoding occurs at model instantiation  
+        # NOTE Text encoding occurs at model instantiation
+        # Create the dataset classes for train, valid, and test  
         train_dataset = generate_dataset(train_df, args)
-        #print(train_dataset.target)
-        #print("train_dataset object is of type -- ",type(train_dataset))
-        #print("Print Encoded Token Byte tensor at location 1 -- ", train_dataset[1]['input_ids'])
-
-        #print(train_df['target'].nunique())
-        
-        #encoding = train_dataset[1]['input_ids']
-        # TODO - the line below does not print out in Windows python due to unicode error would need
-        #        to convert each of the items to ascii or utf-8
-        # print("The Decoded Token Text tensor is -- ",train_dataset.tokenizer.convert_ids_to_tokens(encoding))
-        
         train_data_loader = torch.utils.data.DataLoader(
             dataset = train_dataset,
             batch_size = args.train_batch_size,
@@ -141,15 +83,6 @@ def run(args: Model_Config):
         # BHG Model Paramter definition
         num_train_steps = int(len(train_df) / args.train_batch_size * args.epochs)
 
-        #print(model.named_parameters())
-        
-        # BHG definition of named_parameters from PyTorch documentation
-        # Returns an iterator over module parameters, yielding both the name 
-        #   of the parameter as well as the parameter itself.
-
-        # Weight_Decay: Manually setting the weight_decay of the model paramters based on the
-        # name of the parameter
-
         param_optimizer = list(model.named_parameters())
         no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         optimizer_parameters = [
@@ -166,22 +99,7 @@ def run(args: Model_Config):
                 "weight_decay": 0.0,
             },
         ]
-
-        # As per the Kaggle On Stability of a Few-Samples tutorial you should not 
-        # Also blanket override the weight_decay if it is declared conditionaly in
-        # the optimizer_parameter dictionary
-        #https://www.kaggle.com/code/rhtsingh/on-stability-of-few-sample-transformer-fine-tuning
-        #
-        # optimizer = AdamW(
-        #     optimizer_grouped_parameters,
-        #     lr=lr,
-        #     eps=epsilon,
-        #     correct_bias=not use_bertadam # bias correction step - not needed default is True
-        # )
-        # However in running a test the results came out exactly the same so it must be
-        # smart enough to know to use the weights correctly as defined in the optimizer_parameters
-        #
-        
+             
         optimizer = AdamW(
             params = optimizer_parameters,
             lr = args.learning_rate,

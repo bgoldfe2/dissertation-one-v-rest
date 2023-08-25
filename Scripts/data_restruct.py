@@ -6,8 +6,8 @@
 import pandas as pd
 import os
 
-os.chdir("/home/bruce/dev/dissertation-binary/Scripts/")
-#os.chdir("/content/drive/MyDrive/Github/dissertation-binary/Scripts/")
+os.chdir("/home/bruce/dev/dissertation-one-v-rest/Scripts/")
+#os.chdir("/content/drive/MyDrive/Github/dissertation-one-v-rest/Scripts/")
 def parse_all_traits():
 
     fld_path = '../Dataset/SixClass/'
