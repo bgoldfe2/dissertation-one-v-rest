@@ -10,21 +10,9 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
+import pprint
 
-
-def parse_tvn(run_folder):
-    #folder = 'Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output'
-    file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Age-test_acc-0.8619641547007652.csv'
-    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Ethnicity-test_acc-0.7924745833770045.csv'
-    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Gender-test_acc-0.8691961010376271.csv'
-    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Others-test_acc-0.6660727387066345.csv'
-    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Religion-test_acc-0.9057750759878419.csv'
-
-    ################# Outer Loop to read in all the files aka traits in Ensemble/Output and loop #################################
-
-    # TODO loop through the folder and get each of the files starting with acc in the name or not metrics in the name?
-    # iterate over files in that directory
-
+def get_results(run_folder):
     # Flag that identifies output results
     results_flag = '_acc-'
     results_file_list = []
@@ -37,6 +25,112 @@ def parse_tvn(run_folder):
             if results_flag in filename:
                 results_file_list.append(filename)
 
+    
+
+    return results_file_list
+
+def tawt(run_folder):
+    
+    rsf = get_results(run_folder)
+    print(rsf)
+
+    df_dict = {}
+    
+    for results in rsf:    
+        # file trait identifier during loop
+        file_trt = results.split('---')[0]
+        print('The file trait this iteration is ',file_trt)
+
+        # Set the file location for one v rest runs        
+        file = ''.join([run_folder,'Output/',results])
+
+        df = pd.read_csv(file)
+        total_all = len(df)
+        print(total_all)
+        print(df.columns)
+        # Number in per label that are correct
+        df['match'] = df['target']==df['y_pred']
+        
+        # Number in per label that are correct
+        count = df.groupby('label').size()
+        print("count is of type ", type(count))
+        print("keys are ", count.axes)
+        print("get value for ", file_trt, " ", count.get(file_trt))
+        print("Size of each trait \n", count)
+
+        # Add each trait one-vs-rest to df_list
+        df_dict[file_trt] = df
+    
+    df_Age = df_dict.get('Age')
+    df_Ethnic = df_dict.get('Ethnicity')
+    df_Gender = df_dict.get('Gender')
+    df_Notcb = df_dict.get('Notcb')
+    df_Other = df_dict.get('Others')
+    df_Religion = df_dict.get('Religion')
+
+    print(len(df_Age), " should be equal to ", len(df_Ethnic))
+
+    print("age", df_Age[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0], 
+          'Ethnicity', df_Ethnic[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0],
+          'Gender', df_Gender[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0],
+          'Notcb', df_Notcb[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0],
+          'Others', df_Other[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0],
+          'Religion', df_Religion[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0])
+
+    cnt = 0
+    hits = []
+    for i in range(len(df_Age)):
+        out = []
+        out.append(df_Age[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
+        out.append(df_Ethnic[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
+        out.append(df_Gender[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
+        out.append(df_Notcb[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
+        out.append(df_Other[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
+        out.append(df_Religion[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
+        
+        #pprint.pprint(out)
+
+        # gather data for other near misses within threshold
+        # for ic in range(6):
+        #     if float(out[ic][4]) > 0.1 and float(out[ic][4]) < 0.5:
+        #         hits.append(out[ic][4])
+        
+        # Check for [0, 0], [0, 1], and [1, 0] the target trait chose correctly
+        
+        for ic in range(6):
+            if out[ic][1]==0:
+                #print(traits.get(str(ic)), " is zero")
+                if out[ic][2]==0:
+                    #print(traits.get(str(ic)), " is target and y_pred match")
+                    cnt+=1
+                #else: # did not select target trait correctly
+                    #print(traits.get(str(ic)), " is target and y_pred matched incorrectly")
+            #else: # not the target
+                #if out[ic][2]==0:
+                    #print(traits.get(str(ic)), " is not the target and y_pred matched incorrectly")
+
+    print("accuracy is ", cnt/9541)
+    # Threshold values description
+    # avg = sum(hits)/len(hits)
+    # print("total between .1 and .5 is ", len(hits))
+    # print("average between .1 and .5 is ", avg)  
+    # df_result = pd.DataFrame(hits)
+    # print(df_result.describe())    
+
+
+
+
+def parse_tvn(run_folder):
+    #folder = 'Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output'
+    file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Age-test_acc-0.8619641547007652.csv'
+    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Ethnicity-test_acc-0.7924745833770045.csv'
+    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Gender-test_acc-0.8691961010376271.csv'
+    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Others-test_acc-0.6660727387066345.csv'
+    #file = '../Runs/2023-08-14_16_20_29--roberta-base/Ensemble/Output/ensemble-Religion-test_acc-0.9057750759878419.csv'
+
+    ################# Outer Loop to read in all the files aka traits in Ensemble/Output and loop #################################
+
+    results_file_list = get_results(run_folder)                
     print(results_file_list)
     
     for results in results_file_list:    
@@ -145,5 +239,7 @@ def parse_tvn(run_folder):
 
 if __name__=="__main__":
     test_run = '../Runs/2023-08-24_17_46_26--roberta-base/'
-    parse_tvn(test_run)
+    #parse_tvn(test_run)
     #graph_by_trt(df, cm)
+    
+    tawt(test_run)
