@@ -166,14 +166,6 @@ def evaluate_all_models(args: Model_Config):
     #df = pd.read_csv(''.join([test_data_path, 'test_Age.csv']))
     #print(df.head())
 
-    # TODO Do I want the Notcb to be tested? Should there be a Notcb model which is an Notcb vs the rest?
-    # I think this is wrong, we want all the data including the Notcb
-    # eval_just_cb_traits = copy.deepcopy(traits)
-    # print("should be all the traits ", eval_just_cb_traits)
-    # trt_pop = eval_just_cb_traits.pop('3', 'no key found')
-    # just_cb = eval_just_cb_traits.values()
-    # print('just cb is ',just_cb)
-    # print("trt popped out is ", trt_pop)
     all_traits_values = traits.values()
     all_test_data = []
     for each_trt in all_traits_values:
@@ -195,7 +187,7 @@ def evaluate_all_models(args: Model_Config):
         test_df.loc[test_df['label'] == trt, 'target'] = 0
         test_df.loc[test_df['label'] != trt, 'target'] = 1
         trt_mdl.to(device)
-        args.pretrained_model="roberta-base"
+        args.pretrained_model="roberta-large"
         #print(test_df)
         #test_df.to_csv(''.join([args.ensemble_path, 'ensemble_test_data.csv']), index=True)
         # TODO this is missing original targets of 3, Notcb need those back in?

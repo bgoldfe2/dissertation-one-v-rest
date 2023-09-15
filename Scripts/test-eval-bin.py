@@ -28,7 +28,7 @@ if __name__=="__main__":
 
     # Declare the model list and pre-trained model
     model_list = [0, 1, 2, 4 , 5]
-    pretrained_model = 'roberta-base'
+    pretrained_model = 'roberta-large'
         
     args = Model_Config(raw_args)
     args.model_list = model_list

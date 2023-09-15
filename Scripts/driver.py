@@ -18,15 +18,15 @@ from ensemble import averaging
 warnings.filterwarnings("ignore")
 
 # Kludge for onsite network
-# import os
-# import ssl
-# os.environ['CURL_CA_BUNDLE'] = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
-# try:
-#     _create_unverified_https_context = ssl._create_unverified_context
-# except AttributeError:
-#     pass
-# else:
-#     ssl._create_default_https_context = _create_unverified_https_context
+import os
+import ssl
+os.environ['CURL_CA_BUNDLE'] = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
 # End Kludge onsite network
 
 # New v3.0 - Converts to Binary model per trait for six trait, six models
@@ -57,8 +57,8 @@ def get_parser():
     parser.add_argument("--device", type=str, default="gpu", help="Training device - cpu/gpu")
     #parser.add_argument("--dataset", type=str, default="FGBC", help="Select Dataset - FGBC/Twitter")
 
-    parser.add_argument("--pretrained_model", default="roberta-base", type=str, help='Name of the pretrained model')  
-    parser.add_argument("--roberta_hidden", default=768, type=int, help='Number of hidden states for Roberta')
+    parser.add_argument("--pretrained_model", default="roberta-large", type=str, help='Name of the pretrained model')  
+    parser.add_argument("--roberta_hidden", default=1024, type=int, help='Number of hidden states for Roberta')
 
     # Need to change for Version 3 to tree ensemble
     parser.add_argument("--ensemble_type", type=str, default="max-voting", help="Ensemble type - max-voting or averaging")
@@ -88,12 +88,12 @@ if __name__=="__main__":
     torch.cuda.manual_seed(raw_args.seed)
     
     # Declare the model list - From version 1 model ensemble
-    #model_list = ['microsoft/deberta-v3-base', 'EleutherAI/gpt-neo-125m', 'roberta-base',\
+    #model_list = ['microsoft/deberta-v3-base', 'EleutherAI/gpt-neo-125m', 'roberta-large',\
     #                'xlnet-base-cased', 'albert-base-v2']
     
-    # Version 3 - Single model in list being roberta-base
+    # Version 3 - Single model in list being roberta-large
     #               Keeping list syntax as may include BertViz or others
-    model_list = ['roberta-base']
+    model_list = ['roberta-large']
 
     # convert immutable args to python class instance and set up dynamic folder structure
     args = Model_Config(raw_args)
@@ -108,7 +108,7 @@ if __name__=="__main__":
     print("args type in driver main after create_folders ", type(args))
     train_all_models(args)
     # print("########################### TRAINING COMPLETE #########################################")
-    # evaluate_all_models(args)
+    evaluate_all_models(args)
     # print("############################ EVALUATION COMPLETE ######################################")
-    # averaging(args)
+    # tawt(test_run) # TODO need to get current run folder as argument
     # print("############################ ENSEMBLE COMPLETE ########################################")

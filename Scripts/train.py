@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 from Model_Config import Model_Config, traits
 import os
 
-os.chdir('/home/bruce/dev/dissertation-one-v-rest/Scripts')
+#os.chdir('/home/bruce/dev/dissertation-one-v-rest/Scripts')
 
 
 def run(args: Model_Config):
@@ -180,7 +180,7 @@ def generate_dataset(df, cur_args: Model_Config):
         return DatasetGPT_Neo(text=df.text.values, target=df.target.values, args=cur_args)
     elif(cur_args.pretrained_model == "EleutherAI/gpt-neo-1.3B"):
         return DatasetGPT_Neo13(text=df.text.values, target=df.target.values, args=cur_args)
-    elif(cur_args.pretrained_model== "roberta-base"):
+    elif(cur_args.pretrained_model== "roberta-large"):
         return DatasetRoberta(text=df.text.values, target=df.target.values, args=cur_args)
     elif(cur_args.pretrained_model== "xlnet-base-cased"):
         return DatasetXLNet(text=df.text.values, target=df.target.values, args=cur_args)
@@ -198,7 +198,7 @@ def set_model(args):
         return GPT_NeoFGBC(args)
     elif(args.pretrained_model == "EleutherAI/gpt-neo-1.3B"):
         return GPT_Neo13FGBC(args)
-    elif(args.pretrained_model == "roberta-base"):
+    elif(args.pretrained_model == "roberta-large"):
         return RobertaFGBC(args)
     elif(args.pretrained_model == "xlnet-base-cased"):
         return XLNetFGBC(args)

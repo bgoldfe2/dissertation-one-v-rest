@@ -4,12 +4,14 @@
 # date: July 23, 2023
 # adapted from prior work
 
+from __future__ import annotations
 import torch
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, classification_report, matthews_corrcoef, f1_score, accuracy_score, precision_score, recall_score
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
+
 
 from model import DeBertaFGBC, RobertaFGBC, XLNetFGBC, AlbertFGBC, GPT_NeoFGBC, GPT_Neo13FGBC
 from dataset import DatasetDeberta, DatasetRoberta, DatasetXLNet, DatasetAlbert, DatasetGPT_Neo, DatasetGPT_Neo13
@@ -202,7 +204,7 @@ def evaluate_ensemble(max_vote_df, args):
 def generate_dataset_for_ensembling(args, df):
     if(args.pretrained_model == "microsoft/deberta-v3-base"):
         dataset = DatasetDeberta(args, text=df.text.values, target=df.target.values)
-    elif(args.pretrained_model== "roberta-base"):
+    elif(args.pretrained_model== "roberta-large"):
         dataset = DatasetRoberta(args, text=df.text.values, target=df.target.values)
     elif(args.pretrained_model== "xlnet-base-cased"):
         dataset = DatasetXLNet(args, text=df.text.values, target=df.target.values)
@@ -246,7 +248,7 @@ def load_models(args: Model_Config):
         print('model path in load models is ', mdl_path)
 
         roberta_path = (mdl_path)
-        args.pretrained_model="roberta-base"
+        args.pretrained_model="roberta-large"
         roberta = RobertaFGBC(args)        
         roberta.load_state_dict(torch.load(roberta_path))
         all_trt_models[trt] = roberta
