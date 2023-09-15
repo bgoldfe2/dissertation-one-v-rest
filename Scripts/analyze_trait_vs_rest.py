@@ -94,7 +94,7 @@ def tawt(run_folder, Threshold=0.25):
         out.append(df_Other[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
         out.append(df_Religion[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
         
-        #pprint.pprint(out)
+        pprint.pprint(out)
         
         # gather data for other near misses within threshold
         # for ic in range(6):
@@ -293,3 +293,5 @@ if __name__=="__main__":
     #graph_by_trt(df, cm)
     
     tawt(test_run)
+
+    # test add comment
