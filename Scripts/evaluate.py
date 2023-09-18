@@ -68,13 +68,13 @@ def test_evaluate(trt, test_df, test_data_loader, model, device, args: Model_Con
 
     # NEW Add in the probabilities in as softmax by exp the log_softmax from loss function
 
-    for i in y_proba:
-        print("type proba ", type(y_proba))
-        print("first proba ", y_proba[0])
-        print("first element in tuple ", y_proba[0][0])
-        print("normal not log ", math.exp(y_proba[0][0]))
-        print("normal not log other part ", math.exp(y_proba[0][1]))
-        print("adds up to ", math.exp(y_proba[0][0]) + math.exp(y_proba[0][1]))
+    # for i in y_proba:
+    #     print("type proba ", type(y_proba))
+    #     print("first proba ", y_proba[0])
+    #     print("first element in tuple ", y_proba[0][0])
+    #     print("normal not log ", math.exp(y_proba[0][0]))
+    #     print("normal not log other part ", math.exp(y_proba[0][1]))
+    #     print("adds up to ", math.exp(y_proba[0][0]) + math.exp(y_proba[0][1]))
         
     prob_trt = []
     prob_not_trt = []
