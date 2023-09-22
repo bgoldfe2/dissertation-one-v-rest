@@ -94,7 +94,7 @@ def tawt(run_folder, Threshold=0.25):
         out.append(df_Other[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
         out.append(df_Religion[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[i].tolist())
         
-        pprint.pprint(out)
+        #pprint.pprint(out)
         
         # gather data for other near misses within threshold
         # for ic in range(6):
@@ -106,7 +106,7 @@ def tawt(run_folder, Threshold=0.25):
         for ic in range(6):
             if out[ic][1]==0:
                 #print(traits.get(str(ic)), " is zero")
-                if out[ic][2]==0:
+                if out[ic][2]==0:  # Correctly labelled positive TP
                     #print(traits.get(str(ic)), " is target and y_pred match")
                     cnt+=1
                     correct_dict = dict()
@@ -114,7 +114,7 @@ def tawt(run_folder, Threshold=0.25):
                     correct_dict['test_idx']=i
                     correct_dict['trt_prob']=out[ic][4]
                     correct.append(correct_dict)
-                elif out[ic][2]==1: # did not select target trait correctly
+                elif out[ic][2]==1: # positive labelled negative FN
                     #print(traits.get(str(ic)), " is target and y_pred matched incorrectly")
                     if out[ic][4] > Threshold:
                         thresh_dict = dict()
@@ -124,14 +124,14 @@ def tawt(run_folder, Threshold=0.25):
                         within_thresh.append(thresh_dict)
 
             elif out[ic][1]==1: # not the target
-                if out[ic][2]==0:
+                if out[ic][2]==0:  # negative labelled positive FP
                     #print(traits.get(str(ic)), " is not the target and y_pred matched incorrectly")
                     wrong_dict = dict()
                     wrong_dict['wrong_lbl']=ic
                     wrong_dict['test_idx']=i
                     wrong_dict['prob_trt']=out[ic][4]
                     wrong.append(wrong_dict)
-                elif out[ic][2]==1:  # True Negative but check for threshold
+                elif out[ic][2]==1:  # True Negative but check for threshold  TN
                     if out[ic][4] > Threshold:
                         tn_dict = dict()
                         tn_dict['true_neg_lbl']=ic
@@ -212,8 +212,11 @@ def parse_tvn(run_folder):
         fig1, ax = plt.subplots()
         plt.title(''.join(["Single Trait ", file_trt, " vs All the Rest"]))
         sns.heatmap(cm, annot=True, fmt='d')
-        plt.xlabel('Predicted')
-        plt.ylabel('True')
+        
+        # Oooops had the labels switched for the pattern with FP in upper right :-)
+        # TODO propogate to other codebases
+        plt.ylabel('Predicted')
+        plt.xlabel('True')
         trt_labels = [file_trt,'All-the-Rest']
         ax.set_yticklabels(trt_labels)
         ax.set_xticklabels(trt_labels)
@@ -288,10 +291,9 @@ def parse_tvn(run_folder):
 
 
 if __name__=="__main__":
-    test_run = '../Runs/2023-08-24_17_46_26--roberta-base/'
+    test_run = '../Runs/2023-09-17_12_14_42--roberta-large/'
     # parse_tvn(test_run)
     #graph_by_trt(df, cm)
     
-    tawt(test_run)
-
-    # test add comment
+    threshold = 0.2
+    tawt(test_run, threshold)

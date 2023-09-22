@@ -18,15 +18,15 @@ from ensemble import averaging
 warnings.filterwarnings("ignore")
 
 # Kludge for onsite network
-import os
-import ssl
-os.environ['CURL_CA_BUNDLE'] = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
+# import os
+# import ssl
+# os.environ['CURL_CA_BUNDLE'] = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+# try:
+#     _create_unverified_https_context = ssl._create_unverified_context
+# except AttributeError:
+#     pass
+# else:
+#     ssl._create_default_https_context = _create_unverified_https_context
 # End Kludge onsite network
 
 # New v3.0 - Converts to Binary model per trait for six trait, six models
