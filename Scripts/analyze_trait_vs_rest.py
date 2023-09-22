@@ -31,6 +31,16 @@ def get_results(run_folder):
     return results_file_list
 
 def tawt(run_folder, Threshold=0.25):
+    """Triggered and Within Threshold
+
+    This function performs the final assessment of accuracy for the OvR model.
+    It introduces a threshold ability to include additional traits that exceed an
+    insignificant margin (e.g., 0.1, 0.2, 0.3, 0.4) as additional labels in a now
+    Multi-Label output. This methodology increases accuracy with the inclusion of
+    any of the labels in the multi-label output are counted as 'accurate' and 
+    included as such in the test metrics ouputs.  This is intented to be
+    implemented as a semi-supervised model with human interaction.
+    """
     
     rsf = get_results(run_folder)
     print(rsf)
@@ -96,11 +106,7 @@ def tawt(run_folder, Threshold=0.25):
         
         #pprint.pprint(out)
         
-        # gather data for other near misses within threshold
-        # for ic in range(6):
-        #     if float(out[ic][4]) > 0.1 and float(out[ic][4]) < 0.5:
-        #         hits.append(out[ic][4])
-        
+        # Gather data for traits within threshold
         # Check for [0, 0], [0, 1], and [1, 0] the target trait chose correctly
         
         for ic in range(6):
@@ -139,9 +145,7 @@ def tawt(run_folder, Threshold=0.25):
                         tn_dict['prob_trt']= out[ic][4]
                         true_neg_thresh.append(tn_dict)
 
-        #print('wrong list is \n', wrong)
-        #print('correct list is \n', correct)
-        
+                
     print("accuracy is ", cnt/9541)
     print("count and length of correct differnce = ",len(correct) - cnt)
     wt_len = len(within_thresh)
@@ -151,7 +155,13 @@ def tawt(run_folder, Threshold=0.25):
     #print("True negative within threshold examples are\n", true_neg_thresh[0:4])
     out_path = ''.join([run_folder, 'Ensemble/Output/'])
     
-    #print(correct)
+    # Check whether the specified path exists or not
+    out_path = ''.join([out_path, 'threshold_',str(Threshold)])
+    isExist = os.path.exists(out_path)
+    if not isExist:
+        # Create a new directory because it does not exist
+        os.makedirs(out_path)
+        
     
     with open(''.join([out_path, 'true_pos_outputfile']), 'w') as fout:
         json.dump(correct, fout)
@@ -161,9 +171,6 @@ def tawt(run_folder, Threshold=0.25):
         json.dump(within_thresh, fout)
     with open(''.join([out_path, 'true_neg_outputfile']), 'w') as fout:
         json.dump(true_neg_thresh, fout)
-
-       
-
 
 
 
