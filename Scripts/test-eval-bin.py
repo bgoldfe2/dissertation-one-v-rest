@@ -27,7 +27,8 @@ if __name__=="__main__":
     raw_args = parser.parse_args()
 
     # Declare the model list and pre-trained model
-    model_list = [0, 1, 2, 4 , 5]
+    #model_list = [0, 1, 2, 4 , 5]
+    model_list = ['Age', 'Gender', 'Ethnicity', 'Notcb', 'Others', 'Religion']
     pretrained_model = 'roberta-large'
         
     args = Model_Config(raw_args)
@@ -35,7 +36,7 @@ if __name__=="__main__":
     args.pretrained_model = pretrained_model
 
     # TODO currently hardcode this test run folder
-    run2test =  "2023-08-14_16_20_29--roberta-base" #2023-07-03_14_53_05--deberta-v3-base"
+    run2test =  "2023-08-24_17_46_26--roberta-base" #2023-07-03_14_53_05--deberta-v3-base"
     folder_name = "../Runs/" + run2test 
 
     # High level folders defined

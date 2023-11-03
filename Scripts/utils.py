@@ -121,7 +121,8 @@ def get_output_results(args)->dict[str, str]:
     file_dict = dict()
     mod_list = args.model_list
     for mod in mod_list:
-        dir_results = args.output_path + '*' + mod + '*'
+        dir_results = args.output_path + mod + '-test_metrics.csv'
+        print(dir_results)
         result = glob(dir_results)[0]
         file_dict[mod]=result
     print(mod_list)
@@ -134,43 +135,32 @@ def load_prediction(args):
     
     file_map = get_output_results(args)
     
-    #print(type(file_map))
-    search_key = 'deberta'
-    deberta_path = [val for key, val in file_map.items() if search_key in key][0]
-    #print(deberta_path)
-    deberta = pd.read_csv(deberta_path)
-    #print(deberta.shape)
-    #print(deberta.head())
-    
-    search_key= 'xlnet'
-    xlnet_path = [val for key, val in file_map.items() if search_key in key][0]
-    #print(xlnet_path)
-    xlnet = pd.read_csv(xlnet_path)
-    #print(xlnet.shape)
-    #print(xlnet.head())
+    search_key = 'Age'
+    Age_path = [val for key, val in file_map.items() if search_key in key][0]
+    Age = pd.read_csv(Age_path)
         
-    search_key= 'roberta'
-    roberta_path = [val for key, val in file_map.items() if search_key in key][0]
-    #print(roberta_path)
-    roberta = pd.read_csv(roberta_path)
-    #print(roberta.shape)
-    #print(roberta.head())
+    search_key= 'Gender'
+    Gender_path = [val for key, val in file_map.items() if search_key in key][0]
+    Gender = pd.read_csv(Gender_path)
+            
+    search_key= 'Ethnicity'
+    Ethnicity_path = [val for key, val in file_map.items() if search_key in key][0]
+    Ethnicity = pd.read_csv(Ethnicity_path)
     
-    search_key= 'albert'
-    albert_path = [val for key, val in file_map.items() if search_key in key][0]
-    #print(albert_path)
-    albert = pd.read_csv(albert_path)
-    #print(albert.shape)
-    #print(albert.head())
+    search_key= 'Notcb'
+    Notcb_path = [val for key, val in file_map.items() if search_key in key][0]
+    Notcb = pd.read_csv(Notcb_path)
+        
+    search_key= 'Others'
+    Others_path = [val for key, val in file_map.items() if search_key in key][0]
+    Others = pd.read_csv(Others_path)
+
+    search_key= 'Religion'
+    Religion_path = [val for key, val in file_map.items() if search_key in key][0]
+    Religion = pd.read_csv(Religion_path)
     
-    search_key= 'gpt-neo'
-    gpt_neo_path = [val for key, val in file_map.items() if search_key in key][0]
-    #print(gpt_neo_path)
-    gpt_neo = pd.read_csv(gpt_neo_path)
-    #print(gpt_neo.shape)
-    #print(gpt_neo.head())
     
-    return deberta, xlnet, roberta, albert, gpt_neo
+    return Age, Ethnicity, Gender, Notcb, Others, Religion
 
 def print_stats(max_vote_df, deberta, xlnet, roberta, albert):
     print(max_vote_df.head())

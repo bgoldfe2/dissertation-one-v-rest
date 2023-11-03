@@ -20,18 +20,18 @@ from utils import sorting_function, evaluate_ensemble, print_stats, load_predict
 def max_vote(args):
     print(f'\n---Max voting ensemble---\n')
 
-    deberta, xlnet, roberta, albert, gptneo = load_prediction(args)
+    age, ethnicity, gender, notcb, others, religion = load_prediction(args)
 
     target = []
-    deberta_pred = []
+    age_pred = []
     xlnet_pred = []
     roberta_pred = []
     albert_pred = []
     gptneo_pred = []
 
-    for index in range(len(deberta)):
-       target.append(deberta['target'][index])
-       deberta_pred.append(deberta['y_pred'][index])
+    for index in range(len(age)):
+       target.append(age['target'][index])
+       age_pred.append(age['y_pred'][index])
        xlnet_pred.append(xlnet['y_pred'][index])
        roberta_pred.append(roberta['y_pred'][index])
        albert_pred.append(albert['y_pred'][index])
@@ -39,7 +39,7 @@ def max_vote(args):
 
     max_vote_df = pd.DataFrame()
     max_vote_df['target'] = target
-    max_vote_df['deberta'] = deberta_pred
+    max_vote_df['age'] = age_pred
     max_vote_df['xlnet'] = xlnet_pred
     max_vote_df['roberta'] = roberta_pred
     max_vote_df['albert'] = albert_pred
@@ -59,46 +59,7 @@ def max_vote(args):
     print("In max_vote going to evaluate_ensemble")
     evaluate_ensemble(max_vote_df, args)
     
-def max_vote3():
-    print(f'\n---Max voting ensemble for the best three classifiers---\n')
 
-    deberta, xlnet, roberta, albert, gptneo = load_prediction()
-
-    target = []
-    
-    xlnet_pred = []
-    roberta_pred = []
-    albert_pred = []
-    gptneo_pred = []
-
-    for index in range(len(deberta)):
-       target.append(deberta['target'][index])
-       
-       xlnet_pred.append(xlnet['y_pred'][index])
-       roberta_pred.append(roberta['y_pred'][index])
-       albert_pred.append(albert['y_pred'][index])
-       gptneo_pred.append(gptneo['y_pred'][index])
-
-    max_vote_df = pd.DataFrame()
-    max_vote_df['target'] = target
-    
-    max_vote_df['xlnet'] = xlnet_pred
-    max_vote_df['roberta'] = roberta_pred
-    max_vote_df['albert'] = albert_pred
-    max_vote_df['gptneo'] = gptneo_pred
-
-    # print_stats(max_vote_df, deberta, xlnet, roberta, albert)
-    # end of additional lines ? what changed?
-    preds = []
-
-    for index in range(len(max_vote_df)):
-        values = max_vote_df.iloc[index].values[1:]
-        sorted_values = sorted(Counter(values).items(), key = sorting_function, reverse=True)
-        preds.append(sorted_values[0][0])
-        
-    max_vote_df['pred'] = preds
-
-    evaluate_ensemble(max_vote_df)
 
 # BHG Added new function
 def rocauc(args):
