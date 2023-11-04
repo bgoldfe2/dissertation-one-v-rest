@@ -14,6 +14,8 @@ import pprint
 import json
 import random
 import copy
+from collections import Counter
+from random import randrange
 
 traits_int ={ 0: "Age", 1: "Ethnicity", 2: "Gender", 3: "Notcb", 4: "Others", 5: "Religion"}
 
@@ -399,12 +401,9 @@ def idxMax(run_folder, Threshold=0.25):
     #       'Others\n', df_Other[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0],
     #       'Religion\n', df_Religion[['label','target','y_pred','match', 'prob-trt', 'prob-not-trt']].iloc[0])
 
-    cnt = 0
+    cnts = []
     result_idx_max = {}
-    #correct = []
-    #wrong = []
-    #within_thresh = []
-    #true_neg_thresh = []
+    correct = []
     for i in range(len(df_Age)):
         out = []
         out.append(df_Age[['target','y_pred']].iloc[i].tolist())
@@ -414,42 +413,50 @@ def idxMax(run_folder, Threshold=0.25):
         out.append(df_Other[['target','y_pred']].iloc[i].tolist())
         out.append(df_Religion[['target','y_pred']].iloc[i].tolist())
         
-        correct = []
-        
-        # Gather data for traits within threshold
-        # Check for [0, 0], [0, 1], and [1, 0] the target trait chose correctly
-        
+        # Naive Algorithm simply selecting the first positive trait and then
+        # going to the next test element
+        hit_flag = 0
         for ic in range(6):
-            if out[ic][0]==0:
-                #print(traits.get(str(ic)), " is zero")
-                if out[ic][1]==0:  # Correctly labelled positive TP
-                    #print(traits.get(str(ic)), " is target and y_pred match")
-                    #cnt+=1
-                    correct_dict = dict()
-                    correct_dict['correct_lbl']=traits_int.get(ic)
-                    correct_dict['test_idx']=i
-                    #correct_dict['trt_prob']=out[ic][4]
-                    correct.append(correct_dict)
+            if out[ic][1]==0:
+                hit_flag+=1
+                if (hit_flag==1):
+                    correct.append(ic)
+        
+        cnts.append(hit_flag)
+
+        if hit_flag == 0:
+            correct.append(randrange(6))
                 
-        #print(correct)
-        if len(correct) == 1:
-            result_idx_max[i]={'y_pred':correct[0].get('correct_lbl')}
-        else:
-            result_idx_max[i]={'y_pred':'Wrong'}
+                
+                
+                
+        
+        
+        # asdf
+
+        # if len(correct) == 1:
+        #     result_idx_max[i]={'y_pred':correct[0].get('correct_lbl')}
+        # else:
+        #     result_idx_max[i]={'y_pred':'Wrong'}
         #print("Results for idxMax ", result_idx_max)
 
         # if cnt > 10:
         #     break
         # cnt+=1
 
+    print(correct[:10])
+    print(len(correct))
+
+    print(Counter(cnts))
+
     df_results = pd.DataFrame(result_idx_max)
     print(df_results.to_numpy().flatten())
     test_df = pd.read_csv(''.join(['/home/bruce/dev/dissertation-one-v-rest/Dataset/SixClass/','test.csv'])).dropna().reset_index()
-    print(test_df['label'].head())
-    acc = accuracy_score(test_df['label'], df_results.to_numpy().flatten())
-    f1 = f1_score(test_df['label'], df_results.to_numpy().flatten(), average='macro')
-    rc = recall_score(test_df['label'], df_results.to_numpy().flatten(), average='macro')
-    pr = precision_score(test_df['label'], df_results.to_numpy().flatten(), average='macro')
+    print(test_df['target'].head())
+    acc = accuracy_score(test_df['target'], correct)
+    f1 = f1_score(test_df['target'], correct, average='macro')
+    rc = recall_score(test_df['target'], correct, average='macro')
+    pr = precision_score(test_df['target'], correct, average='macro')
     print('accuracy is ', acc*100)
     print('f1 is ', f1*100)
     print('rc is ', rc*100)
@@ -607,7 +614,7 @@ if __name__=="__main__":
     #parse_tvn(test_run)
     #graph_by_trt(df, cm)
 
-    #idxMax(test_run)
+    idxMax(test_run)
     
-    threshold = 0.5
-    new_tawt(test_run, threshold)
+    #threshold = 0.5
+    #new_tawt(test_run, threshold)
