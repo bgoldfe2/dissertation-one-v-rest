@@ -1,0 +1,20 @@
+Accuracy,"
+",0.8856513992244
+MCC,"
+",0.5681220783265876
+Precision,"
+",0.8825067199901198
+Recall,"
+",0.8856513992244
+F1_score,"
+",0.883892863682322
+Classification_Report,"
+","              precision    recall  f1-score   support
+
+           0     0.6602    0.6121    0.6352      1552
+           1     0.9257    0.9388    0.9322      7989
+
+    accuracy                         0.8857      9541
+   macro avg     0.7929    0.7755    0.7837      9541
+weighted avg     0.8825    0.8857    0.8839      9541
+"
